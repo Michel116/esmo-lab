@@ -21,7 +21,8 @@ import { Separator } from '@/components/ui/separator';
 import { AppLogo } from '@/components/AppLogo';
 import { Switch } from '@/components/ui/switch';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { getInspectors, addInspector, updateInspector, deleteInspector, getFastVerifyMode, saveFastVerifyMode } from '@/lib/db';
+import { getInspectors, addInspector, updateInspector, deleteInspector } from '@/lib/db';
+import { getFastVerifyMode, saveFastVerifyMode } from '@/lib/localStorage';
 import { cn } from '@/lib/utils';
 
 const ROLES: InspectorRole[] = ['Разработчик', 'Администратор', 'Поверитель +', 'Поверитель', 'Тест'];

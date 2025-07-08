@@ -38,7 +38,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import * as XLSX from 'xlsx';
-import { getFastVerifyMode, getImportedThermoSerials, saveImportedThermoSerials } from "@/lib/db";
+import { getFastVerifyMode, getImportedThermoSerials, saveImportedThermoSerials } from "@/lib/localStorage";
 
 
 interface DataEntryFormProps {
