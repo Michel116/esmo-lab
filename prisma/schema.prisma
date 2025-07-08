@@ -1,0 +1,50 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Модель для пользователей (поверителей)
+model Inspector {
+  id        String      @id @default(uuid())
+  name      String
+  login     String      @unique
+  password  String
+  role      InspectorRole
+  email     String?
+  entries   DataEntry[]
+}
+
+// Модель для записей поверки
+model DataEntry {
+  id             String    @id @default(uuid())
+  serialNumber   String
+  deviceType     String // Используем String для DeviceId
+  deviceName     String
+  measuredValues Json // Храним сложные данные в формате JSON
+  inspectorId    String
+  inspector      Inspector @relation(fields: [inspectorId], references: [id], onDelete: Cascade)
+  timestamp      DateTime  @default(now())
+
+  @@index([serialNumber, deviceType])
+}
+
+// Модель для шаблонов протоколов
+model ProtocolTemplate {
+  id          String @id @default(uuid())
+  name        String
+  fileContent Bytes // Используем Bytes для хранения бинарных данных (Base64 нужно будет декодировать)
+}
+
+// Перечисление для ролей (используем ASCII-совместимые имена)
+enum InspectorRole {
+  Developer
+  Administrator
+  Verifier_Plus
+  Verifier
+  Test
+}
