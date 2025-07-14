@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// генератор клиента Prisma. Он отвечает за создание Prisma Client,
+// который вы используете в своем коде для взаимодействия с базой данных.
+generator client {
+  provider = "prisma-client-js"
+  // Добавление engineType = "library" решает проблемы совместимости с OpenSSL
+  // в различных средах выполнения (например, на Netlify или в Docker).
+  engineType = "library"
+}
+
+// определение источника данных. Здесь указывается,
+// какую базу данных вы используете (PostgreSQL) и как к ней подключиться.
+datasource db {
+  provider = "postgresql"
+  // url получается из переменной окружения DATABASE_URL,
+  // которая хранится в вашем файле .env.
+  url      = env("DATABASE_URL")
+}
+
+// --- Модели данных ---
+
+// Модель для хранения информации о поверителях (пользователях системы).
+model Inspector {
+  id           String      @id @default(uuid())
+  name         String
+  login        String      @unique
+  password     String
+  role         InspectorRole @default(Verifier)
+  email        String?
+  dataEntries  DataEntry[]
+
+  @@map("inspectors")
+}
+
+// Модель для хранения записей о поверках.
+model DataEntry {
+  id             String    @id @default(uuid())
+  serialNumber   String
+  deviceType     String
+  deviceName     String
+  measuredValues Json
+  inspector      Inspector @relation(fields: [inspectorId], references: [id], onDelete: Cascade)
+  inspectorId    String
+  timestamp      DateTime  @default(now())
+
+  @@map("data_entries")
+}
+
+// Модель для хранения шаблонов протоколов (Excel-файлов).
+model ProtocolTemplate {
+  id          String @id @default(uuid())
+  name        String
+  fileContent Bytes
+
+  @@map("protocol_templates")
+}
+
+// Перечисление для ролей пользователей.
+enum InspectorRole {
+  Developer
+  Administrator
+  Verifier_Plus
+  Verifier
+  Test
+}
