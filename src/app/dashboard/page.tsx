@@ -3,7 +3,6 @@
 
 import { useState, useEffect, Suspense, useCallback } from "react";
 import Link from 'next/link';
-import Image from 'next/image';
 import type { Inspector, DataEntry, DeviceId } from "@/types";
 import { DEVICE_OPTIONS, DEVICE_CONFIGS, INSPECTOR_DEVICE_IDS } from "@/config/devices";
 import { useAuth } from "@/hooks/useAuth";
