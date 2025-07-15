@@ -1,4 +1,3 @@
-
 import type { LucideIcon } from 'lucide-react';
 
 export type DeviceId = 'thermometer' | 'alcotest' | 'inspector' | 'tonometer';
@@ -113,6 +112,7 @@ export interface DataEntry {
   measuredValues: Record<string, any> & {
     subDeviceType?: DeviceId; // Для 'inspector' указывает, какой реальный прибор поверялся
     zipCode?: string; // Для группировки приборов ЗИП
+    arshinVerified?: boolean; // Для подтверждения в Аршин
     
     // Для Алкотестера (многоточечный)
     verifiedAlcoPoints?: VerifiedAlcoPointData[]; // Массив всех поверенных точек для данной сессии алкотестера
