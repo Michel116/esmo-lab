@@ -5,9 +5,9 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import type { DataEntry } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { Loader2, Archive, ChevronDown, Info, ArrowLeft, Smartphone, PcCase, ArrowRight, Trash2, ExternalLink } from 'lucide-react';
+import { Loader2, Archive, ChevronDown, Info, ArrowLeft, Smartphone, PcCase, ArrowRight, Trash2, ExternalLink, CheckCircle2, AlertCircle, Bell } from 'lucide-react';
 import { AppLogo } from '@/components/AppLogo';
-import { getEntries, deleteDataEntry } from '@/lib/db';
+import { getEntries, deleteDataEntry, upsertDataEntry } from '@/lib/db';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale/ru';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 
 type MetrologyView = 'main' | 'zip';
@@ -59,6 +60,28 @@ export default function MetrologyPage() {
     }
   };
 
+  const handleToggleArshinVerified = async (entry: DataEntry) => {
+    if (!currentUser) return;
+    const updatedEntry = {
+      ...entry,
+      measuredValues: {
+        ...entry.measuredValues,
+        arshinVerified: !entry.measuredValues.arshinVerified,
+      }
+    };
+
+    try {
+      await upsertDataEntry(updatedEntry, currentUser.id);
+      fetchData();
+      toast({
+        title: "Статус обновлен",
+        description: `Статус 'В Аршине' для S/N ${entry.serialNumber} был изменен.`,
+      });
+    } catch (error) {
+      toast({ title: "Ошибка", description: "Не удалось обновить статус.", variant: "destructive" });
+    }
+  };
+
   const handleCheckArshin = (serialNumber: string) => {
     const arshinSearchUrl = `https://fgis.gost.ru/fundmetrology/cm/results?search=${encodeURIComponent(serialNumber)}`;
     window.open(arshinSearchUrl, '_blank');
@@ -93,8 +116,17 @@ export default function MetrologyPage() {
                             Запись от: {format(new Date(entry.timestamp), "dd.MM.yy HH:mm", { locale: ru })}
                         </p>
                     </div>
-                    <div className="flex items-center">
-                        <Badge variant="outline" className="mr-3 text-xs border-orange-400 text-orange-600 bg-orange-50">
+                    <div className="flex items-center gap-2">
+                         {entry.measuredValues.arshinVerified ? (
+                          <Badge variant="outline" className="border-green-400 text-green-700 bg-green-50">
+                            <CheckCircle2 className="h-3 w-3 mr-1" /> В Аршине
+                          </Badge>
+                        ) : (
+                          <Badge variant="destructive" className="border-red-400/50 bg-red-50 text-red-600">
+                             <AlertCircle className="h-3 w-3 mr-1" /> Требует подтверждения
+                          </Badge>
+                        )}
+                        <Badge variant="outline" className="border-[#6293dd] text-[#6293dd] bg-[#6293dd]/10">
                             <Archive className="h-3 w-3 mr-1"/> ЗИП: {entry.measuredValues.zipCode}
                         </Badge>
                         <ChevronDown className="h-5 w-5 shrink-0 transition-transform duration-200 text-muted-foreground group-data-[state=open]:rotate-180" />
@@ -102,7 +134,17 @@ export default function MetrologyPage() {
                 </div>
             </AccordionTrigger>
             <AccordionContent className="p-4 border-t">
-                <div className="flex flex-col sm:flex-row justify-end items-start gap-4">
+                 <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                    <div className="space-y-2">
+                       <Button
+                          variant={entry.measuredValues.arshinVerified ? "secondary" : "default"}
+                          size="sm"
+                          onClick={() => handleToggleArshinVerified(entry)}
+                        >
+                          <CheckCircle2 className="mr-2 h-4 w-4" />
+                          {entry.measuredValues.arshinVerified ? "Отменить подтверждение" : "Подтвердить занесение в Аршин"}
+                        </Button>
+                    </div>
                     <div className="flex items-center gap-2 self-end sm:self-center">
                         <Button
                             variant="outline"
@@ -152,7 +194,13 @@ export default function MetrologyPage() {
     );
   }
 
-  const renderZipView = () => (
+  const renderZipView = () => {
+    const unverifiedCounts = Object.entries(groupedZipEntries).reduce((acc, [code, entries]) => {
+      acc[code] = entries.filter(e => !e.measuredValues.arshinVerified).length;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return (
      <div className="max-w-6xl mx-auto animation-fadeInUp">
         <Button
             variant="outline"
@@ -167,18 +215,37 @@ export default function MetrologyPage() {
         {Object.keys(groupedZipEntries).length > 0 ? (
             <Accordion type="multiple" className="w-full space-y-2">
                 {Object.entries(groupedZipEntries).sort(([a], [b]) => a.localeCompare(b)).map(([code, zipGroupEntries]) => (
-                <AccordionItem value={`zip-${code}`} key={`zip-${code}`} className="border rounded-md shadow-sm bg-orange-50/30 border-orange-200">
+                <AccordionItem value={`zip-${code}`} key={`zip-${code}`} className="border rounded-md shadow-sm bg-[#6293dd]/10 border-[#6293dd]/30">
                     <AccordionTrigger className="p-3 hover:no-underline group">
                         <div className="flex items-center gap-3">
-                        <Archive className="h-5 w-5 text-orange-600"/>
+                        <Archive className="h-5 w-5 text-[#6293dd]"/>
                         <div className="text-left">
-                            <p className="font-semibold text-orange-800">Группа ЗИП Термометров: {code}</p>
-                            <p className="text-xs text-orange-700/80">{zipGroupEntries.length} шт.</p>
+                            <p className="font-semibold text-[#0f3a7e]">Группа ЗИП Термометров: {code}</p>
+                            <p className="text-xs text-[#6293dd]/80">{zipGroupEntries.length} шт.</p>
                         </div>
                         </div>
-                        <ChevronDown className="h-5 w-5 shrink-0 transition-transform duration-200 text-muted-foreground group-data-[state=open]:rotate-180" />
+                        <div className="flex items-center gap-2">
+                            {unverifiedCounts[code] > 0 && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="relative">
+                                    <Bell className="h-5 w-5 text-red-500 animate-pulse" />
+                                    <span className="absolute -top-1 -right-2 bg-red-600 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                                      {unverifiedCounts[code]}
+                                    </span>
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>{unverifiedCounts[code]} термометр(ов) требует подтверждения.</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                            )}
+                            <ChevronDown className="h-5 w-5 shrink-0 transition-transform duration-200 text-muted-foreground group-data-[state=open]:rotate-180" />
+                        </div>
                     </AccordionTrigger>
-                    <AccordionContent className="p-2 border-t border-orange-200 bg-card">
+                    <AccordionContent className="p-2 border-t border-[#6293dd]/30 bg-card">
                         <Accordion type="multiple" className="w-full space-y-2">
                         {zipGroupEntries
                             .sort((a,b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
@@ -208,7 +275,7 @@ export default function MetrologyPage() {
             </Card>
         )}
     </div>
-  );
+  )};
 
   const renderMainView = () => (
      <div className="max-w-2xl mx-auto animation-fadeInUp">
