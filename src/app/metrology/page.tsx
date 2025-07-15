@@ -217,14 +217,14 @@ export default function MetrologyPage() {
                 {Object.entries(groupedZipEntries).sort(([a], [b]) => a.localeCompare(b)).map(([code, zipGroupEntries]) => (
                 <AccordionItem value={`zip-${code}`} key={`zip-${code}`} className="border rounded-md shadow-sm bg-[#6293dd]/10 border-[#6293dd]/30">
                     <AccordionTrigger className="p-3 hover:no-underline group">
-                        <div className="flex items-center gap-3">
-                        <Archive className="h-5 w-5 text-[#6293dd]"/>
-                        <div className="text-left">
-                            <p className="font-semibold text-[#0f3a7e]">Группа ЗИП Термометров: {code}</p>
-                            <p className="text-xs text-[#6293dd]/80">{zipGroupEntries.length} шт.</p>
-                        </div>
-                        </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-1 items-center gap-4">
+                            <div className="flex items-center gap-3">
+                                <Archive className="h-5 w-5 text-[#6293dd]"/>
+                                <div className="text-left">
+                                    <p className="font-semibold text-[#0f3a7e]">Группа Термометров: {code}</p>
+                                    <p className="text-xs text-[#6293dd]/80">{zipGroupEntries.length} шт.</p>
+                                </div>
+                            </div>
                             {unverifiedCounts[code] > 0 && (
                             <TooltipProvider>
                               <Tooltip>
@@ -242,8 +242,8 @@ export default function MetrologyPage() {
                               </Tooltip>
                             </TooltipProvider>
                             )}
-                            <ChevronDown className="h-5 w-5 shrink-0 transition-transform duration-200 text-muted-foreground group-data-[state=open]:rotate-180" />
                         </div>
+                        <ChevronDown className="h-5 w-5 shrink-0 transition-transform duration-200 text-muted-foreground group-data-[state=open]:rotate-180" />
                     </AccordionTrigger>
                     <AccordionContent className="p-2 border-t border-[#6293dd]/30 bg-card">
                         <Accordion type="multiple" className="w-full space-y-2">
