@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { QrCode, Save, AlertTriangle, ArrowRight, ArrowLeft, Info, Check, XCircle, Settings2, Loader2, AlertCircle, Thermometer, Smartphone, Edit3, Target, ChevronRight, PcCase, FileUp, ListFilter, Archive } from "lucide-react";
+import { QrCode, Save, AlertTriangle, ArrowRight, ArrowLeft, Info, Check, XCircle, Settings2, Loader2, AlertCircle, Thermometer, Smartphone, Edit3, ScanFace, ChevronRight, PcCase, FileUp, ListFilter, Archive } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
   Dialog,
@@ -1732,7 +1732,7 @@ export function DataEntryForm({ selectedDevice, selectedInspector, onSaveEntry, 
                 >
                 <CardContent className="p-3 flex items-center justify-between">
                     <div className="flex items-center">
-                        <Target className={cn("h-5 w-5 mr-2",
+                        <ScanFace className={cn("h-5 w-5 mr-2",
                             pointStatus && pointStatus.verdict === 'Годен' && "text-green-600",
                             pointStatus && pointStatus.verdict === 'Брак' && "text-red-600",
                             pointStatus && pointStatus.verdict === 'Ошибка данных' && "text-yellow-600",
@@ -1802,7 +1802,7 @@ export function DataEntryForm({ selectedDevice, selectedInspector, onSaveEntry, 
                 >
                 <CardContent className="p-3 flex items-center justify-between">
                     <div className="flex items-center">
-                    <Target className={cn("h-5 w-5 mr-2",
+                    <ScanFace className={cn("h-5 w-5 mr-2",
                          pointStatus && pointStatus.verdict === 'Годен' && "text-green-600",
                          pointStatus && pointStatus.verdict === 'Брак' && "text-red-600",
                          pointStatus && pointStatus.verdict === 'Ошибка данных' && "text-yellow-600",
