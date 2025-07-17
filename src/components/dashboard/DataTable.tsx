@@ -1,7 +1,7 @@
 
 "use client";
 
-import type { DataEntry, DeviceId, VerifiedAlcoPointData, AlcotestDeviceConfig, StandardDeviceConfig, ThermometerDeviceConfig, ThermometerVerificationPoint, VerifiedThermoPointData, ProtocolTemplate } from "@/types";
+import type { DataEntry, DeviceId, VerifiedAlcoPointData, AlcotestDeviceConfig, StandardDeviceConfig, ThermometerDeviceConfig, ThermometerVerificationPoint, VerifiedThermoPointData, ProtocolTemplate, Inspector } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Download, Info, Trash2, ChevronDown, Check, AlertTriangle, Target, Thermometer as ThermometerIcon, Smartphone as SmartphoneIcon, XCircle, FileText, FileSpreadsheet, Archive } from "lucide-react";
 import { format } from 'date-fns';
@@ -92,7 +92,7 @@ export const renderEntryContent = (entry: DataEntry, onDeleteEntry: (id: string)
             </div>
             <div className="flex items-center">
               {zipCode && (
-                <Badge variant="outline" className="mr-3 text-xs border-orange-400 text-orange-600 bg-orange-50">
+                <Badge variant="outline" className="mr-3 text-xs border-[#6293dd] text-[#6293dd] bg-[#6293dd]/10">
                   <Archive className="h-3 w-3 mr-1"/> ЗИП: {zipCode}
                 </Badge>
               )}
@@ -214,7 +214,7 @@ export const renderEntryContent = (entry: DataEntry, onDeleteEntry: (id: string)
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Отмена</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => onDeleteEntry(entry.id)}>Удалить</AlertDialogAction>
+                        <AlertDialogAction onClick={() => onDeleteEntry(id)}>Удалить</AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
@@ -230,12 +230,15 @@ interface DataTableProps {
   onDeleteEntry: (id: string) => void;
   onClearAllEntries: () => void;
   protocolTemplates: ProtocolTemplate[];
+  currentUser: Inspector | null;
 }
 
 interface GroupedEntries { [key: string]: DataEntry[]; }
 
-export function DataTable({ entries, onDeleteEntry, onClearAllEntries, protocolTemplates }: DataTableProps) {
+export function DataTable({ entries, onDeleteEntry, onClearAllEntries, protocolTemplates, currentUser }: DataTableProps) {
   const { toast } = useToast();
+  
+  const isPrivilegedUser = currentUser?.role === 'Администратор' || currentUser?.role === 'Разработчик';
 
   const groupedEntries = useMemo(() => {
     return entries.reduce((acc, entry) => {
@@ -599,7 +602,7 @@ export function DataTable({ entries, onDeleteEntry, onClearAllEntries, protocolT
             </div>
             <div className="flex items-center">
               {zipCode && (
-                <Badge variant="outline" className="mr-3 text-xs border-orange-400 text-orange-600 bg-orange-50">
+                <Badge variant="outline" className="mr-3 text-xs border-[#6293dd] text-[#6293dd] bg-[#6293dd]/10">
                   <Archive className="h-3 w-3 mr-1"/> ЗИП: {zipCode}
                 </Badge>
               )}
@@ -757,25 +760,27 @@ export function DataTable({ entries, onDeleteEntry, onClearAllEntries, protocolT
           <Button onClick={handleExport} variant="outline" disabled={entries.length === 0}>
             <Download className="mr-2 h-4 w-4" /> Экспорт в Excel
           </Button>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive" disabled={entries.length === 0}>
-                <Trash2 className="mr-2 h-4 w-4" /> Очистить все
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Вы уверены?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Это действие удалит все собранные записи безвозвратно.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Отмена</AlertDialogCancel>
-                <AlertDialogAction onClick={onClearAllEntries}>Удалить</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          {isPrivilegedUser && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" disabled={entries.length === 0}>
+                  <Trash2 className="mr-2 h-4 w-4" /> Удалить все
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Вы уверены?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Это действие удалит все собранные записи безвозвратно.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Отмена</AlertDialogCancel>
+                  <AlertDialogAction onClick={onClearAllEntries}>Удалить</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
         </div>
       </div>
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as DeviceId)}>
