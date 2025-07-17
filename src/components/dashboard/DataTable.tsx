@@ -214,7 +214,7 @@ export const renderEntryContent = (entry: DataEntry, onDeleteEntry: (id: string)
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Отмена</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => onDeleteEntry(id)}>Удалить</AlertDialogAction>
+                        <AlertDialogAction onClick={() => onDeleteEntry(entry.id)}>Удалить</AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
@@ -794,18 +794,18 @@ export function DataTable({ entries, onDeleteEntry, onClearAllEntries, protocolT
                  {isCurrentTabThermometer && Object.keys(zipEntries).length > 0 && (
                    <Accordion type="multiple" className="w-full space-y-2">
                       {Object.entries(zipEntries).sort(([a], [b]) => a.localeCompare(b)).map(([code, zipGroupEntries]) => (
-                        <AccordionItem value={`zip-${code}`} key={`zip-${code}`} className="border rounded-md shadow-sm bg-orange-50/30 border-orange-200">
+                        <AccordionItem value={`zip-${code}`} key={`zip-${code}`} className="border rounded-md shadow-sm bg-[#6293dd]/10 border-[#6293dd]/30">
                           <AccordionTrigger className="p-3 hover:no-underline group">
                              <div className="flex items-center gap-3">
-                                <Archive className="h-5 w-5 text-orange-600"/>
+                                <Archive className="h-5 w-5 text-[#6293dd]"/>
                                 <div className="text-left">
-                                  <p className="font-semibold text-orange-800">Группа ЗИП: {code}</p>
-                                  <p className="text-xs text-orange-700/80">{zipGroupEntries.length} шт.</p>
+                                  <p className="font-semibold text-[#0f3a7e]">Группа ЗИП: {code}</p>
+                                  <p className="text-xs text-[#6293dd]/80">{zipGroupEntries.length} шт.</p>
                                 </div>
                              </div>
                              <ChevronDown className="h-5 w-5 shrink-0 transition-transform duration-200 text-muted-foreground group-data-[state=open]:rotate-180" />
                           </AccordionTrigger>
-                           <AccordionContent className="p-2 border-t border-orange-200 bg-card">
+                           <AccordionContent className="p-2 border-t border-[#6293dd]/30 bg-card">
                              <Accordion type="multiple" className="w-full space-y-2">
                               {zipGroupEntries.sort((a,b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).map(renderEntry)}
                              </Accordion>
