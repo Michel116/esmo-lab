@@ -27,6 +27,8 @@ export default function JournalPage() {
   const [isTemplatesVisible, setIsTemplatesVisible] = useState(true);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const isPrivilegedUser = currentUser?.role === 'Администратор' || currentUser?.role === 'Разработчик';
 
   const fetchData = useCallback(async () => {
     setIsDataLoading(true);
@@ -62,10 +64,14 @@ export default function JournalPage() {
   };
 
   const handleClearAllEntries = async () => {
+    if (!isPrivilegedUser) {
+        toast({ title: "Доступ запрещен", description: "Это действие доступно только администраторам.", variant: "destructive"});
+        return;
+    }
     try {
       await clearAllEntries();
       await fetchData();
-      toast({ title: "Все записи очищены", description: "Все собранные данные были удалены."});
+      toast({ title: "Все записи удалены", description: "Все собранные данные были удалены."});
     } catch(error) {
       toast({ title: "Ошибка", description: "Не удалось очистить журнал.", variant: "destructive"});
     }
@@ -166,6 +172,7 @@ export default function JournalPage() {
                     onDeleteEntry={handleDeleteEntry} 
                     onClearAllEntries={handleClearAllEntries} 
                     protocolTemplates={protocolTemplates}
+                    currentUser={currentUser}
                 />
             </div>
             <div className="xl:col-span-1">
