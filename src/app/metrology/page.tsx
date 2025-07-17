@@ -234,7 +234,7 @@ export default function MetrologyPage() {
                                     <TooltipTrigger asChild>
                                       <div className="relative flex items-center">
                                         <Bell className="h-5 w-5 text-[#f97316] animate-pulse" />
-                                        <span className="absolute -top-1 -right-2 bg-red-600 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                                        <span className="absolute -top-1 -right-2 bg-[#f97316] text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
                                           {unverifiedCounts[code]}
                                         </span>
                                       </div>
